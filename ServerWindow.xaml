@@ -51,7 +51,7 @@
         <GroupBox Grid.Column="1" Header="Статус">
             <DockPanel>
                 <Label x:Name="statusLabel" DockPanel.Dock="Top" Content="Выключено" Background="Pink" HorizontalContentAlignment="Center"/>
-                <Button x:Name="btnSwitchServer" HorizontalAlignment="Stretch" Content="Включить" Click="SwitchServerBtn_Click"/>
+                <Button x:Name="btnSwitchServer" Content="Включить" Click="SwitchServerBtn_Click"/>
             </DockPanel>
         </GroupBox>
 

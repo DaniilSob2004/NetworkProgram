@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace NetworkProgram
 {
@@ -88,28 +87,44 @@ namespace NetworkProgram
                 byte[] buffer = new byte[1024];  // буффер приёма данных
                 while (true)  // бесконечный процесс слушания - постоянная работа сервера
                 {
-                    // ожидание запроса, эта инструкция блокирует поток до приёхода запроса
+                    // ожидание запроса, эта инструкция блокирует поток до прихода запроса
                     Socket socket = listenSocket.Accept();
 
                     // этот код выполняется когда сервер получил запрос
-                    StringBuilder stringBuilder = new();
+                    MemoryStream memoryStream = new();  // "ByteBuilder" - способ накопление байтов
                     do
                     {
-                        int n = socket.Receive(buffer);  // получаем пакет, сохраняем в буффере
-                        // n - кол-во реально полученных байт
-                        // декадируем полученные байты в строку и добавляем в string
-                        stringBuilder.Append(Encoding.UTF8.GetString(buffer, 0, n));  // TODO: узнать кодирование в настройках
-                    
-                    } while (socket.Available > 0);  // пока у сокета есть данные
-                    
-                    string str = stringBuilder.ToString();
-                    Dispatcher.Invoke(() => serverLog.Text += $"{DateTime.Now}: {str}\n");
+                        int n = socket.Receive(buffer);
+                        memoryStream.Write(buffer, 0, n);
+                    } while (socket.Available > 0);
+                    string str = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+                    // декадируем из JSON в ClientRequest
+                    ServerResponse serverResponse = new();
+                    ClientRequest? clientRequest = null;
+                    try { clientRequest = JsonSerializer.Deserialize<ClientRequest>(str); } catch { }
+                    if (clientRequest is null)
+                    {
+                        str = "Error decoding JSON: " + str;
+                        serverResponse.Status = "400 Bad request";
+                        serverResponse.Data = "Error decoding JSON";
+                    }
+                    else
+                    {
+                        str = clientRequest.Data;
+                        serverResponse.Status = "200 OK";
+                        serverResponse.Data = "Received " + DateTime.Now;
+                    }
+                    Dispatcher.Invoke(() => serverLog.Text += $"({DateTime.Now}) {str}\n");
+
+                    // сервер готовит ответ и отправляет клиенту
+                    socket.Send(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(serverResponse)));
+                    socket.Close();
                 }
             }
             catch (Exception)
             {
-                // скорее всего сервер остановился кнопкой из UI
-                // в любом случае работу прекращаем
+                // скорее всего сервер остановился кнопкой из UI, но в любом случае работу прекращаем
                 listenSocket = null;
                 Dispatcher.Invoke(() => serverLog.Text += "Сервер остановлен\n");
             }

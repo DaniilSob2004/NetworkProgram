@@ -29,7 +29,7 @@ namespace NetworkProgram
 
         private void ClientBtn_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Client");
+            new ClientWindow().Show();
         }
     }
 }
