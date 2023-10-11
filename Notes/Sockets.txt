@@ -43,4 +43,33 @@ Server                   Client
  (5)Receive
  (6)Send() ---------->
                        (7)Receive
-                      
+
+------------------------------------------
+
+// Пример без роутера
+Узел 1 (IP1)              Узел 2 (IP2)
+        port 1 [        / connect(IP1:port3)
+        port 2 [       /
+ | ---> port 3 [ <---<
+ |      port 4 [       \
+ |      port 5 [        \   Узел 3 (IP3)
+ |      port 6 [         connect(IP1:port3)
+ |      port 7 [
+ |      ........
+ |
+ |
+server (listen port 3)
+
+// Пример с роутером (тут происходит переброс портов, обращаемся к port5 -> переброс на порт сервера port3)
+Узел 1 (IP1)   router         
+        port 1 [   1]
+        port 2 [   2]          Узел 2 (IP2)
+ | ---> port 3 [-  3]        / connect(IP1:port5)
+ |      port 4 [ | 4]       /
+ |      port 5 [  -5] <---<
+ |      port 6 [   6]       \
+ |      port 7 [   7]        \  Узел 3 (IP3)
+ |      ........              connect(IP1:port5)
+ |
+ |
+server (listen port 3)

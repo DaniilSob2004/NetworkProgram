@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace NetworkProgram
 {
     public class ServerResponse
     {
         public string Status { get; set; } = null!;
-        public string Data { get; set; } = null!;
+        public IEnumerable<ChatMessage>? Messages { get; set; } = null!;  // коллекция сообщений пользователей
     }
 }

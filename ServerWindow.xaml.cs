@@ -21,10 +21,12 @@ namespace NetworkProgram
         private bool isStartServer = false;
         private Socket? listenSocket;  // "слушающий" сокет - ожидает запросы
         private IPEndPoint? endPoint;  // точка(endPoint), которую "слушает" сокет, на эту точку приходят запросы
+        private LinkedList<ChatMessage> messages;  // коллекция сообщений всех пользователей
 
         public ServerWindow()
         {
             InitializeComponent();
+            messages = new();
             CheckUIStatusState();
         }
 
@@ -103,19 +105,39 @@ namespace NetworkProgram
                     ServerResponse serverResponse = new();
                     ClientRequest? clientRequest = null;
                     try { clientRequest = JsonSerializer.Deserialize<ClientRequest>(str); } catch { }
+
+                    bool needLog = true;  // нужно ли логировать данные на экран
                     if (clientRequest is null)
                     {
                         str = "Error decoding JSON: " + str;
                         serverResponse.Status = "400 Bad request";
-                        serverResponse.Data = "Error decoding JSON";
                     }
-                    else
+                    else  // узнаём команду запроса
                     {
-                        str = clientRequest.Data;
-                        serverResponse.Status = "200 OK";
-                        serverResponse.Data = "Received " + DateTime.Now;
+                        if (clientRequest.Command.Equals("Message"))
+                        {
+                            // время устанавливаем которое на сервере
+                            clientRequest.ChatMessage.Moment = DateTime.Now;
+
+                            // добавляем в коллекцию
+                            messages.AddLast(clientRequest.ChatMessage);
+
+                            // логируем
+                            str = clientRequest.ChatMessage.ToString();
+                            serverResponse.Status = "200 OK";
+                        }
+                        else if (clientRequest.Command.Equals("Check")) // синхронизация
+                        {
+                            // узнаём момент последней синхронизации и отправляем в ответ все уведомления, раньше этого момента
+                            serverResponse.Status = "200 OK";
+                            serverResponse.Messages = messages;  //.Where(m => m.Moment > clientRequest.ChatMessage.Moment);
+                            needLog = false;
+                        }
                     }
-                    Dispatcher.Invoke(() => serverLog.Text += $"({DateTime.Now}) {str}\n");
+                    if (needLog)  // только Message будет выводиться, Check не будет
+                    {
+                        Dispatcher.Invoke(() => serverLog.Text += $"({clientRequest!.ChatMessage.Moment}) {str}\n");
+                    }
 
                     // сервер готовит ответ и отправляет клиенту
                     socket.Send(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(serverResponse)));
