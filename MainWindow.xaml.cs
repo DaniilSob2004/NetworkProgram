@@ -31,5 +31,12 @@ namespace NetworkProgram
         {
             new ClientWindow().Show();
         }
+
+        private void GmailBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            new EmailWindow().ShowDialog();
+            Show();
+        }
     }
 }
