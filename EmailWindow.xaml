@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetworkProgram"
         mc:Ignorable="d"
-        Title="EmailWindow" Height="200" Width="300" WindowStartupLocation="CenterScreen">
+        Title="EmailWindow" Height="400" Width="250" WindowStartupLocation="CenterScreen">
     
     <StackPanel>
         <StackPanel Orientation="Horizontal">
@@ -16,8 +16,15 @@
             <Label Content="Тема:"/>
             <TextBox x:Name="textBoxSubject" Text="Hello, from C# WPF code"/>
         </StackPanel>
-        <TextBox x:Name="textBoxContent" Text="Добрый день! Этот текст отправлен из программы C# кода))" TextWrapping="Wrap"/>
+        <TextBox x:Name="textBoxContent" Text="Добрый день! Этот текст отправлен из программы C# кода))" TextWrapping="Wrap" Margin="5 5"/>
         <Button x:Name="BtnSendButton1" Content="Отправить" Margin="10 5" Click="BtnSendButton1_Click"/>
+
+        <TextBox x:Name="textBoxHtml" Text="&lt;h2>Добрий день!&lt;/h2> Вас приветствует программа &lt;b style='color:tomato'>Send Email&lt;/b>"
+                 TextWrapping="Wrap" Margin="5 5"/>
+        <Button x:Name="BtnSendButton2" Content="Отправить" Margin="10 5" Click="BtnSendButton2_Click"/>
+
+        <TextBox x:Name="textBoxHtmlHW" TextWrapping="Wrap" Margin="5 5"/>
+        <Button x:Name="BtnSendButtonHW" Content="Отправить" Margin="10 5" Click="BtnSendButtonHW_Click"/>
     </StackPanel>
     
 </Window>

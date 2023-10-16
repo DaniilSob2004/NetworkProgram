@@ -10,18 +10,19 @@ using System.Windows;
 
 namespace NetworkProgram
 {
+    // Способ получить значения из JSON-файла
     public partial class App : Application
     {
-        // Способ получить значения из JSON-файла
         private static string configFilename = "email-settings.json";
         private static JsonElement? settings = null;
+        private static Random r = new Random();
 
         // В параметре указываем (например: "smtp:email")
         public static string? GetConfiguration(string name)
         {
             if (settings is null)
             {
-                if (!File.Exists(configFilename))
+                if (!File.Exists(configFilename))  // существует ли файл json
                 {
                     MessageBox.Show($"Файл конфигурации '{configFilename}' не найденно...",
                         "Операция не может быть выполнена", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -29,7 +30,8 @@ namespace NetworkProgram
                 }
             }
 
-            try { settings ??= JsonSerializer.Deserialize<dynamic>(File.ReadAllText(configFilename)); }
+            // преобразовываем весь текст из json в тип JsonElement
+            try { settings ??= JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(configFilename)); }
             catch
             {
                 MessageBox.Show($"Файл конфигурации '{configFilename}' повреждён и не может быть прочитан...",
@@ -42,7 +44,7 @@ namespace NetworkProgram
             {
                 try
                 {
-                    foreach (string key in name.Split(':'))  // цикл нужен, потому что в json может быть вложенность
+                    foreach (string key in name.Split(':'))  // цикл, потому что в json может быть вложенность ("smtp:host")
                     {
                         jsonElement = jsonElement?.GetProperty(key);
                     }
@@ -51,6 +53,11 @@ namespace NetworkProgram
                 return jsonElement?.GetString();
             }
             return null;
+        }
+
+        public static int GetRandomNumber(int from, int to)
+        {
+            return r.Next(from, to);
         }
     }
 }
