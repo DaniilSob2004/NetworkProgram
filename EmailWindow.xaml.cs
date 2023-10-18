@@ -57,6 +57,7 @@ namespace NetworkProgram
             };
         }
 
+
         private void BtnSendButton1_Click(object sender, RoutedEventArgs e)
         {
             SmtpClient? smtpClient = GetSmtpClient();
@@ -69,6 +70,7 @@ namespace NetworkProgram
             );
             MessageBox.Show("Отправлено!");
         }
+
 
         private void BtnSendButton2_Click(object sender, RoutedEventArgs e)
         {
@@ -100,7 +102,7 @@ namespace NetworkProgram
 
         private void StartSettingsTextBox()
         {
-            textBoxHtmlHW.Text = $"<h2>Добрий день!</h2> Ваш код подтверждения: <b style='color:tomato'>{App.GetRandomNumber(100000, 999999)}</b>";
+            textBoxHtmlHW.Text = $"<h2>Добрый день!</h2> Ваш код подтверждения: <b style='color:tomato'>{App.GetRandomNumber(100000, 999999)}</b>";
         }
 
         private void BtnSendButtonHW_Click(object sender, RoutedEventArgs e)

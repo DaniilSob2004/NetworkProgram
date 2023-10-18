@@ -38,5 +38,12 @@ namespace NetworkProgram
             new EmailWindow().ShowDialog();
             Show();
         }
+
+        private void GmailConfirmBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            new AuthWindow().ShowDialog();
+            Show();
+        }
     }
 }
