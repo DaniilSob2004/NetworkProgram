@@ -36,6 +36,7 @@ namespace NetworkProgram
             Task.Run(() => LoadAssetsAsync());
         }
 
+
         private async Task LoadAssetsAsync()
         {
             var response = JsonSerializer.Deserialize<CoinCapResponse>(
@@ -56,12 +57,12 @@ namespace NetworkProgram
 
         private void CoinData_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (previousSelectedItem is not null)  // если элемент выделенный
-            {
-                previousSelectedItem.Background = Brushes.White;  // меняем цвет
-            }
             if (sender is ListViewItem item)
             {
+                if (previousSelectedItem is not null)  // если элемент выделенный
+                {
+                    previousSelectedItem.Background = Brushes.White;  // возвращаем обычный цвет
+                }
                 item.Background = Brushes.Aqua;
                 previousSelectedItem = item;
                 if (item.Content is CoinData coinData)
