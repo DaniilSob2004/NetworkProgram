@@ -21,7 +21,7 @@ namespace NetworkProgram
     {
         private readonly HttpClient _httpClient;
         public ObservableCollection<CoinData> CoinsData { get; set; }
-        private ListViewItem? previousSelectedItem;
+        private ListViewItem? previousSelectedItem;  // предыдущий выделенный элемент
 
         public CryptoWindow()
         {
@@ -56,9 +56,9 @@ namespace NetworkProgram
 
         private void CoinData_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (previousSelectedItem is not null)
+            if (previousSelectedItem is not null)  // если элемент выделенный
             {
-                previousSelectedItem.Background = Brushes.White;
+                previousSelectedItem.Background = Brushes.White;  // меняем цвет
             }
             if (sender is ListViewItem item)
             {
@@ -66,7 +66,7 @@ namespace NetworkProgram
                 previousSelectedItem = item;
                 if (item.Content is CoinData coinData)
                 {
-                    MessageBox.Show(coinData.name);
+                    MessageBox.Show(coinData.id);
                 }
             }
         }
