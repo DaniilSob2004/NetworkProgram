@@ -1,5 +1,6 @@
  - HW:
 
+![HW7](https://github.com/DaniilSob2004/NetworkProgram/assets/106149184/8c77aeda-13c4-48b2-9933-d6daaff3dc25)
 ![HW6](https://github.com/DaniilSob2004/NetworkProgram/assets/106149184/a6e49549-799d-482e-875a-a10e4a24e946)
 ![HW6_1](https://github.com/DaniilSob2004/NetworkProgram/assets/106149184/1fac0a15-e6b4-4e4c-8845-13d98cdf4131)
 ![HW5](https://github.com/DaniilSob2004/NetworkProgram/assets/106149184/cfc3d0df-cf39-41cc-87d7-fddee886c9c2)
