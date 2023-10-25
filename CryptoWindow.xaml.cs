@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -55,31 +56,139 @@ namespace NetworkProgram
             }
         }
 
-        private void CoinData_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void CoinData_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is ListViewItem item)
             {
-                if (previousSelectedItem is not null)  // если элемент выделенный
-                {
-                    previousSelectedItem.Background = Brushes.White;  // возвращаем обычный цвет
-                }
-                item.Background = Brushes.Aqua;
-                previousSelectedItem = item;
                 if (item.Content is CoinData coinData)
                 {
-                    MessageBox.Show(coinData.id);
+                    if (previousSelectedItem is not null)  // если элемент выделенный
+                    {
+                        previousSelectedItem.Background = Brushes.White;  // возвращаем обычный цвет
+                    }
+                    item.Background = Brushes.Aqua;
+                    previousSelectedItem = item;
+
+                    await ShowHistory(coinData);  // загружаем историю
                 }
             }
+        }
+
+        private async Task ShowHistory(CoinData coinData)
+        {
+            // отправляем get-запрос
+            var response = JsonSerializer.Deserialize<HisoryResponse>(
+                await _httpClient.GetStringAsync($"/v2/assets/{coinData.id}/history?interval=d1")
+            );
+
+            if (response is null) { MessageBox.Show("Error deserialize 'HisoryResponse'"); return; }
+
+            graphCanvas.Children.Clear();
+
+            // строим график: response.data.time - ось X, response.data.priceUsd - ось Y
+            // особенности: 1) нужно масштабировать - как по Х, так и по Y  -- до размера нашего холста
+            //              2) ось Y перевёрнутая, т.е. 0 в верхней части.
+            // находим мин. и макс. даты и цены
+            long minTime, maxTime;
+            double minPrice, maxPrice;
+            minTime = maxTime = response.data[0].time;
+            minPrice = maxPrice = response.data[0].price;
+            foreach (HistoryItem item in response.data)
+            {
+                if (item.time < minTime) { minTime = item.time; }
+                if (item.time > maxTime) { maxTime = item.time; }
+                if (item.price < minPrice) { minPrice = item.price; }
+                if (item.price > maxPrice) { maxPrice = item.price; }
+            }
+
+            // отступ по Y для подписи оси X (graphCanvas.ActualHeight - xOffset)
+            double yOffset = 50;
+            double graphH = graphCanvas.ActualHeight - yOffset;
+
+            // масштаб: по X -> (0 - это minTime, graphCanvas.ActualWidth - maxTime)
+            // масштаб: по Y -> (0 - это maxPrice, graphCanvas.ActualHeight - minPrice)
+            double x0 = (response.data[0].time - minTime) * graphCanvas.ActualWidth / (maxTime - minTime);
+            double y0 = graphH - ((response.data[0].price - minPrice) * graphH / (maxPrice - minPrice));
+            double x, y;
+            foreach (HistoryItem item in response.data)
+            {
+                x = (item.time - minTime) * graphCanvas.ActualWidth / (maxTime - minTime);
+                y = graphH - ((item.price - minPrice) * graphH / (maxPrice - minPrice));
+                DrawLine(x0, y0, x, y);
+                x0 = x;
+                y0 = y;
+            }
+
+            // рисуем нижнюю ось X
+            DrawLine(0, graphH, graphCanvas.ActualWidth, graphH, Brushes.Violet);
+
+            // рисуем мин. и макс. дату
+            DrawLabel(0, graphH + 5, Formatting.GetDateFromSeconds(minTime), Brushes.Green);
+            DrawLabel(graphCanvas.ActualWidth - 60, graphH + 5, Formatting.GetDateFromSeconds(maxTime), Brushes.Green);
+
+            // рисуем мин. и макс. цену
+            DrawLabel(0, 0, Formatting.GetStringFromPrice(minPrice));
+            DrawLabel(0, graphH + 25, Formatting.GetStringFromPrice(maxPrice));
+        }
+
+        private void DrawLine(double x1, double y1, double x2, double y2, Brush? brush = null)
+        {
+            // если null - то Black, иначе - то, что передали
+            brush ??= new SolidColorBrush(Colors.Black);
+            graphCanvas.Children.Add(new Line()
+            {
+                X1 = x1,
+                Y1 = y1,
+                X2 = x2,
+                Y2 = y2,
+                Stroke = brush,
+                StrokeThickness = 2
+            });
+        }
+
+        private void DrawLabel(double x, double y, string text, Brush? brush = null)
+        {
+            brush ??= new SolidColorBrush(Colors.Red);
+            TextBlock textBlock = new() { Text = text, Foreground = brush, };
+            Canvas.SetLeft(textBlock, x);
+            Canvas.SetTop(textBlock, y);
+            graphCanvas.Children.Add(textBlock);
+        }
+    }
+
+    // formatting class
+    public static class Formatting
+    {
+        public static string GetDateFromSeconds(long seconds)
+        {
+            DateTime epoch = new(1970, 1, 1, 0, 0, 0);
+            return epoch.AddSeconds(seconds / 1000).ToString("dd.MM.yyyy");
+        }
+
+        public static string GetStringFromPrice(double price)
+        {
+            return Math.Round(price, 2).ToString();
         }
     }
 
     // ORM
+    public class HisoryResponse
+    {
+        public List<HistoryItem> data { get; set; } = null!;
+        public long timestamp { get; set; }
+    }
+    public class HistoryItem
+    {
+        public string priceUsd { get; set; } = null!;
+        public long time { get; set; }
+        public double price => double.Parse(priceUsd, CultureInfo.InvariantCulture);
+    }
+
     public class CoinCapResponse
     {
         public List<CoinData> data { get; set; } = null!;
         public long timestamp { get; set; }
     }
-
     public class CoinData
     {
         public string id { get; set; } = null!;

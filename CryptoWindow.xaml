@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:NetworkProgram"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="CryptoWindow" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+        Title="CryptoWindow" Height="475" Width="800" MaxHeight="475" MaxWidth="800" WindowStartupLocation="CenterScreen">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -34,10 +34,7 @@
             </ListView.Resources>
         </ListView>
 
-        <Canvas Grid.Row="1" Grid.Column="1">
-
-        </Canvas>
-
+        <Canvas x:Name="graphCanvas" Grid.Row="1" Grid.Column="1" Margin="5 0"/>
     </Grid>
 
 </Window>
