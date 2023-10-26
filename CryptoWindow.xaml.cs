@@ -2,18 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace NetworkProgram
@@ -83,12 +78,12 @@ namespace NetworkProgram
 
             if (response is null) { MessageBox.Show("Error deserialize 'HisoryResponse'"); return; }
 
-            graphCanvas.Children.Clear();
+            graphCanvas.Children.Clear();  // очищаем холст
 
             // строим график: response.data.time - ось X, response.data.priceUsd - ось Y
             // особенности: 1) нужно масштабировать - как по Х, так и по Y  -- до размера нашего холста
             //              2) ось Y перевёрнутая, т.е. 0 в верхней части.
-            // находим мин. и макс. даты и цены
+            // находим мин. и макс. дату и цену
             long minTime, maxTime;
             double minPrice, maxPrice;
             minTime = maxTime = response.data[0].time;
@@ -101,7 +96,7 @@ namespace NetworkProgram
                 if (item.price > maxPrice) { maxPrice = item.price; }
             }
 
-            // отступ по Y для подписи оси X (graphCanvas.ActualHeight - xOffset)
+            // отступ по Y для подписи оси X (graphCanvas.ActualHeight - yOffset)
             double yOffset = 50;
             double graphH = graphCanvas.ActualHeight - yOffset;
 
@@ -159,9 +154,10 @@ namespace NetworkProgram
     // formatting class
     public static class Formatting
     {
+        private static DateTime epoch = new(1970, 1, 1, 0, 0, 0);
+
         public static string GetDateFromSeconds(long seconds)
         {
-            DateTime epoch = new(1970, 1, 1, 0, 0, 0);
             return epoch.AddSeconds(seconds / 1000).ToString("dd.MM.yyyy");
         }
 
